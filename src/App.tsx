@@ -2,35 +2,113 @@ import { DefaultTheme, ThemeProvider } from "styled-components";
 import { darkTheme, lightTheme } from "./styles/theme";
 
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-import { FC } from "react";
+import { FC, useState } from "react";
 import GlobalStyles from "../src/styles/global";
 import { TodoList } from "./components/TodoList";
 import styled from "styled-components";
 import useLocalStorage from "./hooks/useLocalStorage";
+import { PersonaComponent } from "./components/PersonaClient";
+
 
 const App: FC = () => {
   const [theme, setTheme] = useLocalStorage<DefaultTheme>("theme", lightTheme);
+  const [todos, setTodos] = useState([]);
+
+  const addTodo = (name: string): void => {
+    const newTodo = {
+      id: Date.now(),
+      name,
+      completed: false,
+    };
+    setTodos((prevState) => [...prevState, newTodo]);
+  };
+
+  const toggleTodo = (id: number): void => {
+    setTodos((prevState) =>
+      prevState.map((todo) => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            completed: !todo.completed,
+          };
+        }
+        return todo;
+      })
+    );
+  };
+
+  const editTodo = (id: number, name: string): void => {
+    setTodos((prevState) => {
+      return prevState.map((todo) => {
+        if (todo.id === id) {
+          return {
+            ...todo,
+            name,
+          };
+        }
+        return todo;
+      });
+    });
+  };
+
+  const removeTodo = (id: number): void => {
+    setTodos((prevState) => prevState.filter((todo) => todo.id !== id));
+  };
+
+  const getItemsLeft = () => {
+    return todos.reduce((counter, todo) => {
+      if (!todo.completed) {
+        return counter + 1;
+      }
+      return counter;
+    }, 0);
+  };
+
+  const removeCompleted = (): void => {
+    setTodos((prevState) => prevState.filter((todo) => !todo.completed));
+  };
 
   const themeToggle = () => {
     const newTheme = theme === lightTheme ? darkTheme : lightTheme;
     setTheme(newTheme);
   };
 
-  return (
+  return (<>
     <ThemeProvider theme={theme}>
-      <Header>📓 Todo List</Header>
-      <TodoList />
-      <Footer>
-        Double click on todo to edit <br />
-        <a target="_blank" href="https://www.maxim-grinev-resume.ru/">
-          © Maxim Grinev
-        </a>
-      </Footer>
-      <ThemeToggle onClick={themeToggle}>
-        <DarkModeIcon fontSize="medium" />
-      </ThemeToggle>
-      <GlobalStyles />
+        <Header>📓 Todo List</Header>
+        <PersonaComponent
+          todos={todos}
+          addTodo={addTodo}
+          toggleTodo={toggleTodo}
+          editTodo={editTodo}
+          removeTodo={removeTodo}
+          getItemsLeft={getItemsLeft}
+          removeCompleted={removeCompleted}
+          
+          />
+
+        <TodoList
+          todos={todos}
+          addTodo={addTodo}
+          toggleTodo={toggleTodo}
+          editTodo={editTodo}
+          removeTodo={removeTodo}
+          getItemsLeft={getItemsLeft}
+          removeCompleted={removeCompleted}
+        />
+        
+        <Footer>
+          Double click on todo to edit <br />
+          <a target="_blank" href="https://www.maxim-grinev-resume.ru/">
+            © Maxim Grinev
+          </a>
+        </Footer>
+        <ThemeToggle onClick={themeToggle}>
+          <DarkModeIcon fontSize="medium" />
+        </ThemeToggle>
+        <GlobalStyles />
     </ThemeProvider>
+    </>
   );
 };
 

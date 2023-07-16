@@ -1,6 +1,5 @@
 import * as React from "react";
-
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { FC, useEffect, useMemo, useRef, useState, useContext } from "react";
 import { Filter, ITodo, absurd } from "../types/todo";
 
 import { Container } from "@mui/material";
@@ -9,7 +8,7 @@ import { mockTodos } from "../mock/mockTodos";
 import { styled } from "styled-components";
 import { useTodos } from "../hooks/useTodos";
 
-export const TodoList: FC = () => {
+export const TodoList: FC = (props) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [value, setValue] = useState("");
@@ -23,7 +22,9 @@ export const TodoList: FC = () => {
     removeTodo,
     removeCompleted,
     getItemsLeft,
-  } = useTodos(mockTodos);
+  } = props;
+
+  console.log("todos", todos)
 
   const itemsLeft = getItemsLeft();
 
